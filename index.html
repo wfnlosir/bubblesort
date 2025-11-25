@@ -3,300 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JS Scope: The Snack Tracker</title>
+    <title>Interactive Bubble Sort Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --global-color: #3498db;
-            --local-a-color: #e67e22;
-            --local-b-color: #27ae60;
-            --bg-color: #f4f7f6;
-            --text-color: #2c3e50;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 { margin-bottom: 10px; }
-        p.subtitle { color: #7f8c8d; margin-bottom: 30px; text-align: center; max-width: 600px;}
-
-        .main-container {
-            display: flex;
-            gap: 20px;
-            max-width: 1000px;
-            width: 100%;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* Scope Containers */
-        .scope-box {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 20px;
-            flex: 1 1 300px;
-            display: flex;
-            flex-direction: column;
-            border-top: 5px solid #ccc;
-            position: relative;
-        }
-
-        .global-scope { border-top-color: var(--global-color); }
-        .local-scope-a { border-top-color: var(--local-a-color); }
-        .local-scope-b { border-top-color: var(--local-b-color); }
-
-        .scope-badge {
-            position: absolute;
-            top: -15px;
-            left: 20px;
-            padding: 5px 15px;
-            border-radius: 20px;
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9em;
-        }
-        .badge-global { background-color: var(--global-color); }
-        .badge-local-a { background-color: var(--local-a-color); }
-        .badge-local-b { background-color: var(--local-b-color); }
-
-        /* Variable Display */
-        .variable-display {
-            font-size: 2em;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #ecf0f1;
-            border-radius: 8px;
-        }
-        .var-name { font-size: 0.6em; color: #7f8c8d; display: block; }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: auto; /* Pushes controls to bottom */
-        }
-
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.1s, opacity 0.2s;
-            color: white;
-            text-align: left;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-
-        button:active { transform: scale(0.98); }
-        button:hover { opacity: 0.9; }
-
-        .btn-global { background-color: var(--global-color); }
-        .btn-local-a { background-color: var(--local-a-color); }
-        .btn-local-b { background-color: var(--local-b-color); }
-
-        .code-snippet {
-            display: inline-block;
-            background-color: rgba(0,0,0,0.2);
-            padding: 2px 5px;
-            border-radius: 4px;
-            margin-left: 5px;
-        }
-
-        /* Console Log */
-        #console-log {
-            width: 100%;
-            max-width: 1000px;
-            background-color: #2c3e50;
-            color: #2ecc71;
-            font-family: monospace;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 8px;
-            height: 150px;
-            overflow-y: auto;
-            border-left: 5px solid #2ecc71;
-        }
-        .log-entry { margin-bottom: 5px; }
-        .log-time { color: #95a5a6; margin-right: 10px; }
-    </style>
-</head>
-<body>
-
-    <h1>JS Scope: The Snack Tracker</h1>
-    <p class="subtitle">Learn the difference between Global variables (the communal cafeteria table) and Local variables (your personal lunchbox inside a classroom function).</p>
-
-    <div class="main-container">
-        <div class="scope-box global-scope">
-            <div class="scope-badge badge-global">Global Scope (Outside any function)</div>
-            <h3>The Communal Cafeteria Table</h3>
-            <p>Variables declared here are visible everywhere.</p>
-            
-            <div class="variable-display">
-                <span class="var-name">let globalSnacks =</span>
-                <span id="global-val">10</span>
-            </div>
-
-            <div class="controls">
-                <button class="btn-global" onclick="modifyGlobal(1)">Run: globalSnacks = globalSnacks + 1;</button>
-                <button class="btn-global" onclick="modifyGlobal(-1)">Run: globalSnacks = globalSnacks - 1;</button>
-            </div>
-        </div>
-
-        <div class="scope-box local-scope-a">
-            <div class="scope-badge badge-local-a">Function Scope A</div>
-            <h3>function classroomA() { ... }</h3>
-            <p>A specific classroom. It can see the global table, but also has its own private lunchbox.</p>
-
-            <div class="variable-display" style="opacity: 0.5;" id="local-a-container">
-                <span class="var-name">let localSnacksA =</span>
-                <span id="local-a-val">Not Declared Yet</span>
-            </div>
-
-            <div class="controls">
-                <button class="btn-local-a" onclick="runLocalA_UseGlobal()">Run: console.log(globalSnacks); <br><small>(Try accessing global)</small></button>
-                <button class="btn-local-a" onclick="runLocalA_DeclareLocal()">Run: let localSnacksA = 5; <br><small>(Create local variable)</small></button>
-                <button class="btn-local-a" onclick="runLocalA_ModifyLocal()">Run: localSnacksA++; <br><small>(Modify local only)</small></button>
-            </div>
-        </div>
-
-         <div class="scope-box local-scope-b">
-            <div class="scope-badge badge-local-b">Function Scope B (Shadowing)</div>
-            <h3>function classroomB() { ... }</h3>
-            <p>What happens if we declare a local variable with the <b>same name</b> as a global one?</p>
-
-            <div class="variable-display" style="background-color: #fab1a0">
-                <span class="var-name">let globalSnacks (LOCAL COPY) =</span>
-                <span id="local-b-val">???</span>
-            </div>
-
-            <div class="controls">
-                <button class="btn-local-b" onclick="runLocalB_Shadow()">
-                    Run: let globalSnacks = 50;<br>
-                    console.log(globalSnacks);
-                </button>
-                <p style="font-size: 0.8em; margin: 5px 0;">This is called "Variable Shadowing". The function prioritizes its local version over the global version.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="console-log">
-        <div class="log-entry">Is this thing on? Welcome to the console logger.</div>
-    </div>
-
-
-    <script>
-        // --- THE ACTUAL JAVASCRIPT STATE ---
-        // We are maintaining the state in real JS variables to simulate the behavior accurately.
-        let realGlobalSnacks = 10;
-        let realLocalSnacksA = null; // Represents "not declared yet"
-
-        // --- UI Helper Functions ---
-        const globalValUI = document.getElementById('global-val');
-        const localAValUI = document.getElementById('local-a-val');
-        const localAContainerUI = document.getElementById('local-a-container');
-        const localBValUI = document.getElementById('local-b-val');
-        const consoleLogUI = document.getElementById('console-log');
-
-        function logToConsole(message, scopeType) {
-            const now = new Date();
-            const timeStr = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            // Color code the logs based on where they came from
-            let colorStr = scopeType === 'global' ? 'cyan' : (scopeType === 'localA' ? 'orange' : 'lightgreen');
-            entry.innerHTML = `<span class="log-time">[${timeStr}]</span> <span style="color:${colorStr}">${message}</span>`;
-            consoleLogUI.prepend(entry); // Add new logs to the top
-        }
-
-        function updateUI() {
-            globalValUI.innerText = realGlobalSnacks;
-            
-            if(realLocalSnacksA === null) {
-                localAValUI.innerText = "Not Declared Yet";
-                localAContainerUI.style.opacity = "0.5";
-            } else {
-                localAValUI.innerText = realLocalSnacksA;
-                localAContainerUI.style.opacity = "1.0";
-            }
+        body { font-family: 'Inter', sans-serif; }
+        .code-font { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Smooth transition for bar properties */
+        .bar-visual { 
+            transition: height 0.3s ease, background-color 0.3s ease; 
         }
         
-        // Initialize UI
-        updateUI();
-
-
-        // --- Global Scope Actions ---
-        function modifyGlobal(amount) {
-            realGlobalSnacks += amount;
-            logToConsole(`Global Scope modified 'globalSnacks'. New value: ${realGlobalSnacks}`, 'global');
-            updateUI();
+        /* Highlight classes for code lines */
+        .highlight-line {
+            background-color: #F6E05E; /* Yellow-400 */
+            color: #000 !important; /* Force black text on highlight */
+            font-weight: bold;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        // --- Local Scope A Actions ---
-        function runLocalA_UseGlobal() {
-            // This function demonstrates accessing the outer scope
-            logToConsole(`Inside classroomA(), looking for 'globalSnacks'. Found value: ${realGlobalSnacks}`, 'localA');
-            alert(`Looked outside the classroom and found ${realGlobalSnacks} snacks on the global table.`);
+        /* Ensure code lines render as blocks but keep indentation */
+        .code-line {
+            display: block;
+            padding: 2px 4px;
+            margin-bottom: 2px;
+        }
+        
+        /* Specific styling for the swap block to highlight as a group */
+        #line-swap {
+            padding: 2px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-6 shadow-md">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold">Bubble Sort Visualizer</h1>
+            <p class="opacity-90 mt-2">Watch how the largest numbers "bubble" to the top, step-by-step.</p>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Left Column: Visualizer & Controls -->
+        <div class="flex flex-col gap-6">
+            
+            <!-- Visualization Area -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 flex flex-col">
+                <h2 class="text-lg font-semibold text-gray-500 mb-4 uppercase tracking-wide">Visual Array</h2>
+                
+                <!-- The Bar Chart Container -->
+                <div id="visualizer-container" class="flex-grow flex justify-center gap-2 md:gap-3 pb-4 border-b border-gray-100 px-4">
+                    <!-- Bars will be injected here by JS -->
+                </div>
+                
+                <!-- Legend -->
+                <div class="flex justify-center gap-4 mt-4 text-sm text-gray-600">
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-blue-500 rounded"></div> Unsorted</div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-yellow-400 rounded"></div> Comparing</div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 bg-green-500 rounded"></div> Sorted</div>
+                </div>
+            </div>
+
+            <!-- Controls & Status -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">Controls</h2>
+                    <span id="step-counter" class="text-sm text-gray-500 font-mono">Step: 0</span>
+                </div>
+
+                <div class="flex gap-4 mb-6">
+                    <button onclick="nextStep()" id="btn-next" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2">
+                        <span>Next Step</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                    </button>
+                    <button onclick="resetVisualizer()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg transition shadow-sm">
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Status Box -->
+                <div class="bg-gray-50 border-l-4 border-blue-500 p-4 rounded transition-colors duration-300" id="status-box">
+                    <p id="status-text" class="text-gray-700 font-medium">Click "Next Step" to start sorting.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Code & Logic -->
+        <div class="flex flex-col gap-6">
+            
+            <!-- Code Display -->
+            <div class="bg-[#1e1e1e] rounded-xl shadow-lg overflow-hidden border border-gray-700 flex flex-col h-full">
+                <div class="bg-[#2d2d2d] px-4 py-2 border-b border-gray-700 flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="ml-2 text-gray-400 text-sm font-mono">bubble_sort.py</span>
+                </div>
+                
+                <div class="p-6 overflow-auto flex-grow bg-[#1e1e1e]">
+<div class="code-font text-gray-300 text-sm md:text-base leading-relaxed">
+<span class="code-line"><span class="text-purple-400">def</span> <span class="text-blue-400">bubble_sort</span>(arr):</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;n = <span class="text-yellow-300">len</span>(arr)</span>
+<br>
+<span class="code-line text-gray-500">&nbsp;&nbsp;&nbsp;&nbsp;# Outer loop: n-1 passes are enough</span>
+<span id="line-outer" class="code-line transition-colors duration-200">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> i <span class="text-purple-400">in</span> <span class="text-yellow-300">range</span>(n - <span class="text-orange-300">1</span>):</span>
+<br>
+<span class="code-line text-gray-500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Last i elements are already sorted</span>
+<span id="line-inner" class="code-line transition-colors duration-200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> j <span class="text-purple-400">in</span> <span class="text-yellow-300">range</span>(<span class="text-orange-300">0</span>, n - i - <span class="text-orange-300">1</span>):</span>
+<br>
+<span class="code-line text-gray-500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Compare adjacent elements</span>
+<span id="line-compare" class="code-line transition-colors duration-200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> arr[j] > arr[j+<span class="text-orange-300">1</span>]:</span>
+<br>
+<span class="code-line text-gray-500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Swap using a temp variable</span>
+<div id="line-swap" class="transition-colors duration-200">
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;temp = arr[j]</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j] = arr[j+<span class="text-orange-300">1</span>]</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="text-orange-300">1</span>] = temp</span>
+</div>
+</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Application State ---
+        const INITIAL_DATA = [45, 12, 8, 33, 25, 90, 5, 67, 45, 20];
+        let data = [...INITIAL_DATA];
+        
+        // Loop State Variables
+        let i = 0; // Outer loop index
+        let j = 0; // Inner loop index
+        let isFinished = false;
+        let stepsTaken = 0;
+
+        // Micro-states for smoother animation steps
+        let microState = 'init'; 
+
+        const container = document.getElementById('visualizer-container');
+        const statusText = document.getElementById('status-text');
+        const stepCounter = document.getElementById('step-counter');
+        const btnNext = document.getElementById('btn-next');
+
+        // --- Initialization ---
+        function init() {
+            createBars(); // Create DOM elements once
+            updateBars(); // Apply initial styles
+            updateStatus("Ready to sort. Click Next.");
         }
 
-        function runLocalA_DeclareLocal() {
-            // This simulates declaring 'let localSnacksA = 5;'
-            realLocalSnacksA = 5;
-            logToConsole(`Inside classroomA(), declared new local variable 'localSnacksA' = 5`, 'localA');
-            updateUI();
+        function resetVisualizer() {
+            data = [...INITIAL_DATA];
+            i = 0;
+            j = 0;
+            isFinished = false;
+            stepsTaken = 0;
+            microState = 'init';
+            
+            // Reset UI
+            updateBars([], []); 
+            clearHighlights();
+            updateStatus("Reset complete. Ready to start.");
+            
+            btnNext.disabled = false;
+            btnNext.classList.remove('opacity-50', 'cursor-not-allowed');
+            btnNext.innerHTML = `<span>Next Step</span><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>`;
         }
 
-        function runLocalA_ModifyLocal() {
-             // This simulates 'localSnacksA++;'
-            if(realLocalSnacksA === null) {
-                 logToConsole(`Error: Cannot modify 'localSnacksA' because it hasn't been declared in this function yet!`, 'localA');
-                 alert("You haven't declared the local variable yet! Click the middle button first.");
-            } else {
-                realLocalSnacksA++;
-                logToConsole(`Inside classroomA(), incremented local variable. 'localSnacksA' is now: ${realLocalSnacksA}`, 'localA');
-                updateUI();
-                // Crucial teaching point: show global didn't change
-                setTimeout(() => {
-                     logToConsole(`Notice: The global 'globalSnacks' is still: ${realGlobalSnacks}. The local change didn't affect it.`, 'global');
-                }, 500);
+        // --- DOM Creation (Run Once) ---
+        function createBars() {
+            container.innerHTML = '';
+            data.forEach((val, idx) => {
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'flex flex-col items-center gap-1 flex-1 min-w-[20px] max-w-[50px] h-full justify-end';
+                barWrapper.id = `bar-wrapper-${idx}`;
+
+                const label = document.createElement('span');
+                label.id = `label-${idx}`;
+                label.className = 'text-xs md:text-sm font-bold text-gray-600';
+                label.innerText = val;
+
+                const bar = document.createElement('div');
+                bar.id = `bar-${idx}`;
+                bar.className = 'w-full rounded-t-md shadow-sm bar-visual bg-blue-500'; 
+                bar.style.height = '0%'; 
+
+                barWrapper.appendChild(label);
+                barWrapper.appendChild(bar);
+                container.appendChild(barWrapper);
+            });
+        }
+
+        // --- DOM Updates (Run Every Step) ---
+        function updateBars(highlightIndices = [], swapIndices = []) {
+            const maxVal = Math.max(...data);
+            
+            data.forEach((val, idx) => {
+                const bar = document.getElementById(`bar-${idx}`);
+                const label = document.getElementById(`label-${idx}`);
+                
+                if (bar && label) {
+                    const heightPercent = (val / maxVal) * 85;
+                    bar.style.height = `${Math.max(heightPercent, 5)}%`; 
+                    label.innerText = val;
+
+                    bar.className = 'w-full rounded-t-md shadow-sm bar-visual';
+
+                    // Apply Colors Logic
+                    if (swapIndices.includes(idx)) {
+                        bar.classList.add('bg-red-500'); // Swapping
+                    } else if (highlightIndices.includes(idx)) {
+                        bar.classList.add('bg-yellow-400'); // Comparing
+                    } else if (idx >= data.length - i && i > 0) {
+                        bar.classList.add('bg-green-500'); // Sorted
+                    } else {
+                        bar.classList.add('bg-blue-500'); // Default
+                    }
+                }
+            });
+            
+            stepCounter.innerText = `Steps: ${stepsTaken}`;
+        }
+
+        function clearHighlights() {
+            ['line-outer', 'line-inner', 'line-compare', 'line-swap'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.remove('highlight-line');
+            });
+        }
+
+        function highlightLine(id) {
+            clearHighlights();
+            const el = document.getElementById(id);
+            if(el) el.classList.add('highlight-line');
+        }
+
+        function updateStatus(msg) {
+            statusText.innerText = msg;
+        }
+
+        // --- Core Logic Step Machine ---
+        function nextStep() {
+            if (isFinished) return;
+
+            stepsTaken++;
+
+            // 1. Start / Outer Loop Entry
+            if (microState === 'init') {
+                highlightLine('line-outer');
+                updateStatus(`Starting Pass ${i + 1} of ${data.length - 1}.`);
+                microState = 'start-inner';
+                return;
+            }
+
+            // 2. Start Inner Loop
+            if (microState === 'start-inner') {
+                if (j < data.length - i - 1) {
+                    highlightLine('line-inner');
+                    updateStatus(`Inner Loop: checking index ${j} vs ${j+1}`);
+                    microState = 'compare';
+                } else {
+                    // End of inner loop
+                    highlightLine('line-outer');
+                    
+                    // Important: i increments here
+                    i++; 
+                    j = 0;
+                    
+                    updateStatus(`Pass ${i} Complete! Element at index ${data.length - i} is now sorted.`);
+                    updateBars(); // Refresh to show green sorted bar
+
+                    // Check if fully sorted (updated for range(n-1))
+                    // If we have done n-1 passes, the last remaining element (index 0) is also sorted.
+                    if (i >= data.length - 1) {
+                        isFinished = true;
+                        i = data.length; // Force full green visualization
+                        updateBars();
+                        updateStatus("Sorting Complete! All numbers are sorted.");
+                        clearHighlights();
+                        btnNext.disabled = true;
+                        btnNext.classList.add('opacity-50', 'cursor-not-allowed');
+                        btnNext.innerText = "Done!";
+                        return;
+                    }
+                    
+                    microState = 'start-inner';
+                }
+                return;
+            }
+
+            // 3. Compare
+            if (microState === 'compare') {
+                highlightLine('line-compare');
+                updateBars([j, j+1]); // Highlight yellow
+                
+                const val1 = data[j];
+                const val2 = data[j+1];
+                
+                if (val1 > val2) {
+                    updateStatus(`${val1} > ${val2}. Need to SWAP.`);
+                    microState = 'swap';
+                } else {
+                    updateStatus(`${val1} <= ${val2}. No swap needed.`);
+                    microState = 'increment';
+                }
+                return;
+            }
+
+            // 4. Swap (Only if needed)
+            if (microState === 'swap') {
+                highlightLine('line-swap');
+                
+                // Perform Swap in Data
+                let temp = data[j];
+                data[j] = data[j+1];
+                data[j+1] = temp;
+                
+                // Render swap visual (Red)
+                updateBars([], [j, j+1]); 
+                updateStatus(`Swapped ${data[j]} and ${data[j+1]} using temp variable.`);
+                microState = 'increment';
+                return;
+            }
+
+            // 5. Increment and Loop Back
+            if (microState === 'increment') {
+                j++;
+                microState = 'start-inner'; 
+                nextStep(); // Auto-advance to save user click
             }
         }
 
-
-        // --- Local Scope B Actions (Shadowing) ---
-        function runLocalB_Shadow() {
-            // This is the trickiest concept. We simulate creating a local variable
-            // with the EXACT SAME NAME as the global one.
-            
-            // In real JS, this is what happens inside the function:
-            let globalSnacks = 50; // This is a NEW local variable that shadows the outer one
-            
-            localBValUI.innerText = globalSnacks; // Show the local value in the UI box
-            
-            logToConsole(`Inside classroomB(), we declared 'let globalSnacks = 50'.`, 'localB');
-            logToConsole(`Because the names match, this function now uses its LOCAL version (50) instead of the GLOBAL version (${realGlobalSnacks}).`, 'localB');
-            
-            alert(`Inside classroomB, 'globalSnacks' is ${globalSnacks}. \n\nBut check the blue box! The REAL global variable is still ${realGlobalSnacks}.`);
-
-            // Reset UI after a moment to show it was temporary scope
-            setTimeout(() => {
-                 localBValUI.innerText = "???";
-                 logToConsole(`classroomB() finished running. The local 'globalSnacks' (50) is gone.`, 'localB');
-            }, 3000)
-        }
+        // Start
+        init();
 
     </script>
 </body>
